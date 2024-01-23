@@ -1,0 +1,111 @@
+---
+title: "paper"
+author: "YANYUWU"
+format: pdf
+editor: visual
+---
+
+title: "There is no evidence to show that the voting pass rate is directly related to the number of voters"
+
+author: -YANYU WU 
+thanks: "Code and data are available at: https://github.com/Alicia-y/Telling-stories-with-data-final-paper" 
+date: "`r format(Sys.time(), '%d %B %Y')`" 
+abstract: "We conducted an analysis of voting patterns in the city using information from multiple local polls, focusing on the link between voter participation and the success of initiatives. A detailed analysis of the number of people participating in the poll and the matching pass rate shows no relationship between the two. Our results show that despite common assumptions, there is little correlation between the number of votes cast and the likelihood of a proposal passing. Interestingly, we found a weak positive correlation between the two, suggesting a possible link between approval and turnout. This unexpected finding points to the need for more research on the factors that influence the passage of municipal legislation." 
+output: bookdown::pdf_document2 toc: TRUE bibliography: references.bib ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("opendatatoronto")
+# Set up libraries
+library(knitr)
+library(janitor)
+library(lubridate)
+library(opendatatoronto)
+library(tidyverse)
+```
+
+
+\newpage
+
+# Introduction
+
+As in previous years, people will be able to vote every day in 2024. Given the diversity of the electorate and the numerous local issues facing the City of Toronto, I realize that these elections will have a significant impact. I think civic participation and voting in municipal elections are the hallmarks of a healthy society. Over time, there has been an argument that the number of voters who participate in a given election directly affects the success of the election. This study takes a closer look at some local voting to challenge this idea. Although campaign banners and signs reminding people to vote were a common sight on Toronto's busy streets, many people chose not to vote.
+
+I used municipal voting statistics from the # years in my research; These data are presented in full in the "Data section" below. My goal was to clarify the relationship between different voting success rates and voter turnout. When these statistics are broken down by voter groups and age demographics, a striking pattern emerges: ballot passage rates do not seem to be affected by the number of votes cast. In Part 4, we will critically explore the difficulties of drawing clear conclusions from such complex elections, and the limitations of our data and methods in studying the consequences of these outcomes.
+
+
+# Data
+
+## Datase
+
+```{r}
+data <- read_csv("toronto_poll.csv")
+data <- data %>% clean_names()
+data %>% 
+  head() %>%
+  kable()
+# Check for missing values
+summary(data)
+
+# Depending on your analysis, you might fill missing values or remove rows/columns with missing data
+# For example, to fill NA in a numeric column with its mean:
+# data$column_name[is.na(data$column_name)] <- mean(data$column_name, na.rm = TRUE)
+write_csv(data, "cleaned_toronto_poll.csv")
+
+
+```
+
+
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+# Assuming your data is already read into 'data'
+# If not, use read_csv or similar to load your data
+# data <- read_csv("path/to/toronto_poll.csv")
+
+# Convert OPEN_DATE to Date format if it's not already
+data$OPEN_DATE <- as.Date(data$OPEN_DATE)
+
+# Create a new column for year and month
+data <- data %>%
+  mutate(YEAR_MONTH = floor_date(OPEN_DATE, "month"))
+
+# Count applications per month
+applications_per_month <- data %>%
+  group_by(YEAR_MONTH) %>%
+  summarize(count = n())
+
+# Plot
+ggplot(applications_per_month, aes(x = YEAR_MONTH, y = count)) +
+  geom_line(color = 'blue') +
+  geom_point(color = 'blue') +
+  labs(title = 'Number of Applications per Month Over Time',
+       x = 'Year and Month',
+       y = 'Number of Applications') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+```{r}
+```
+
+
+```{r}
+toronto_poll_clean <-
+  clean_names(toronto_poll) |>
+  mutate(occupancy_date = ymd(occupancy_date)) |> 
+  select(occupancy_date, occupied_beds)
+
+head(toronto_poll_clean)
+
+write_csv(
+  x = toronto_poll_clean,
+  file = "cleaned_toronto_poll.csv"
+)
+    
+```
